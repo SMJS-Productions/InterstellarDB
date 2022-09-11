@@ -1,5 +1,7 @@
 import { readFileSync } from "fs";
 import { Options } from "../interfaces/Options";
+import { ReadOptions } from "../interfaces/ReadOptions";
+import { WriteOptions } from "../interfaces/WriteOptions";
 import { DBInfo } from "../structures/DBInfo";
 import { Entry } from "../structures/Entry";
 import { INode } from "../structures/INode";
@@ -24,12 +26,12 @@ export class InterstellarDB {
 
     private readonly entries: Map<string | number, Map<string | number, number | Record<string, EntryValue>>>;
 
-    private readonly options: Partial<Options>;
+    private readonly options: Partial<Options & (ReadOptions | WriteOptions)>;
 
-    constructor(options?: Partial<Options>);
-    constructor(file: string, options?: Partial<Options>);
-    constructor(buffer: Buffer, options?: Partial<Options>);
-    constructor(arg0?: string | Buffer | Partial<Options>, arg1?: Partial<Options>) {
+    constructor(options?: Partial<Options & WriteOptions>);
+    constructor(path: string, options?: Partial<Options & ReadOptions>);
+    constructor(buffer: Buffer, options?: Partial<Options & ReadOptions>);
+    constructor(arg0?: string | Buffer | Partial<Options & (ReadOptions | WriteOptions)>, arg1?: Partial<Options & (ReadOptions | WriteOptions)>) {
         this.iNodes = new Map();
         this.entries = new Map();
 
@@ -86,7 +88,7 @@ export class InterstellarDB {
                 if (typeof cacheEntry == "number" && this.reader) {
                     const readEntry = new Entry(this.reader.setOffset(cacheEntry), this.iNodes.get(structure)!.structure.struct);
 
-                    if (!this.options.noCache) {
+                    if (!("noCache" in this.options) || !this.options.noCache) {
                         entries.set(entry, readEntry.entry);
                     }
 
@@ -114,7 +116,7 @@ export class InterstellarDB {
                 if (typeof value == "number" && this.reader) {
                     const readEntry = new Entry(this.reader.setOffset(value), this.iNodes.get(structure)!.structure.struct);
 
-                    if (!this.options.noCache) {
+                    if (!("noCache" in this.options) || !this.options.noCache) {
                         entries.set(key, readEntry.entry);
                     }
 
