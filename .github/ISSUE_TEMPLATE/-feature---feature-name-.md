@@ -1,7 +1,7 @@
 ---
-name: "[Feature] {Feature Name}"
+name: "[FEATURE] {Feature Name}"
 about: Suggest an idea for this project
-title: ''
+title: "[FEATURE]"
 labels: enhancement, pending approval
 assignees: SMJSGaming
 
