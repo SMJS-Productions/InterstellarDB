@@ -107,7 +107,45 @@ export class BinWriter {
         return this;
     }
 
-    public writeAnnotation(type: Type): this {
+    public writeNull(): this {
+        this.writeAnnotation(Type.NULL);
+
+        return this;
+    }
+
+    public writeBool(value: boolean, annotated: boolean = true): this {
+        if (annotated) {
+            this.writeAnnotation(Type.BOOL);
+        }
+
+        this.buffer = Buffer.concat([ this.buffer, Buffer.from([ +value ]) ]);
+
+        return this;
+    }
+
+    public writeChar(value: string, annotated: boolean = true): this {
+        if (annotated) {
+            this.writeAnnotation(Type.CHAR);
+        }
+
+        this.buffer = Buffer.concat([ this.buffer, Buffer.from([ value.charCodeAt(0) ]) ]);
+
+        return this;
+    }
+
+    public writeWChar(value: string, annotated: boolean = true): this {
+        const code = value.charCodeAt(0);
+
+        if (annotated) {
+            this.writeAnnotation(Type.WCHAR);
+        }
+
+        this.buffer = Buffer.concat([ this.buffer, Buffer.from([ code >> 8, code & 0xFF ]) ]);
+
+        return this;
+    }
+
+    private writeAnnotation(type: Type): this {
         this.buffer = Buffer.concat([ this.buffer, Buffer.from([ type >> 8, type & 0xFF ]) ]);
 
         return this;
