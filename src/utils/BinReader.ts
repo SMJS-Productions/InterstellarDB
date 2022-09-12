@@ -102,7 +102,7 @@ export class BinReader {
             const length = this.readInteger();
 
             if (this.offset + length * 2 <= this.buffer.length) {
-                return this.buffer.toString("utf16le", this.offset, this.offset += length);
+                return this.buffer.toString("utf16le", this.offset, this.offset += length * 2);
             } else {
                 this.rollbackTo(checkpoint);
 
