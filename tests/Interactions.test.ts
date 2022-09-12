@@ -96,7 +96,7 @@ describe("Reading out the complex binary storage through API interactions", () =
 
 describe("Reading out the complex binary storage through API interactions without caches", () => {
     const db = new InterstellarDB(join(__dirname, "./resources/complex_test.bin"), {
-        noCache: true
+        no_cache: true
     });
 
     defaultDBTests(db);

@@ -10,7 +10,7 @@ import { BinReader } from "../utils/BinReader";
 
 export class InterstellarDB {
 
-    public static readonly CURRENT_VERSION = 1;
+    public static readonly CURRENT_VERSION = DBInfo.VERSION;
     
     public readonly version: number;
 
@@ -88,7 +88,7 @@ export class InterstellarDB {
                 if (typeof cacheEntry == "number" && this.reader) {
                     const readEntry = new Entry(this.reader.setOffset(cacheEntry), this.iNodes.get(structure)!.structure.struct);
 
-                    if (!("noCache" in this.options) || !this.options.noCache) {
+                    if (!("no_cache" in this.options) || !this.options.no_cache) {
                         entries.set(entry, readEntry.entry);
                     }
 
@@ -116,7 +116,7 @@ export class InterstellarDB {
                 if (typeof value == "number" && this.reader) {
                     const readEntry = new Entry(this.reader.setOffset(value), this.iNodes.get(structure)!.structure.struct);
 
-                    if (!("noCache" in this.options) || !this.options.noCache) {
+                    if (!("no_cache" in this.options) || !this.options.no_cache) {
                         entries.set(key, readEntry.entry);
                     }
 
