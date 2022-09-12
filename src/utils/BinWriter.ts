@@ -2,9 +2,12 @@ import { Type } from "../enums/Type";
 
 export class BinWriter {
 
+    private readonly warnings: boolean;
+
     private buffer: Buffer;
     
-    constructor() {
+    constructor(warnings: boolean) {
+        this.warnings = warnings;
         this.buffer = Buffer.allocUnsafe(0);
     }
 
@@ -50,7 +53,7 @@ export class BinWriter {
             this.writeAnnotation(type);
         }
 
-        if ((type != Type.LONG && typeof value == "bigint") || (typeof value == "number" && value >> size * 8)) {
+        if (this.warnings && ((type != Type.LONG && typeof value == "bigint") || (typeof value == "number" && value >> size * 8))) {
             console.warn("Number is too large to fit in the specified type. Precision may be lost.");
         }
 
@@ -80,7 +83,7 @@ export class BinWriter {
     public writeString(value: string, annotated: boolean = true): this {
         const bytes = value.split("").map((char) => char.charCodeAt(0));
 
-        if (bytes.some((byte) => byte >> 8)) {
+        if (this.warnings && bytes.some((byte) => byte >> 8)) {
             console.warn("String contains characters that are outside of the ASCII range.");
         }
 
