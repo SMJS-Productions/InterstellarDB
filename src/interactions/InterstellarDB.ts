@@ -9,7 +9,7 @@ import { BinReader } from "../utils/BinReader";
 export class InterstellarDB {
 
     public static init(path: string, options?: Partial<Options>): InterstellarDB;
-    public static init(path: string, options?: Partial<Options & { asynchronous: true }>): Promise<InterstellarDB>;
+    public static init(path: string, options?: Partial<Options> & { asynchronous: true }): Promise<InterstellarDB>;
     public static init(path: string, options?: Partial<Options>): InterstellarDB | Promise<InterstellarDB> {
         if (options?.asynchronous) {
             return new Promise((resolve, reject) => {
