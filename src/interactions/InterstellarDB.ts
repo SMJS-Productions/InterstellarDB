@@ -1,7 +1,5 @@
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { Options } from "../interfaces/Options";
-import { ReadOptions } from "../interfaces/ReadOptions";
-import { WriteOptions } from "../interfaces/WriteOptions";
 import { DBInfo } from "../structures/DBInfo";
 import { Entry } from "../structures/Entry";
 import { INode } from "../structures/INode";
@@ -26,17 +24,14 @@ export class InterstellarDB {
 
     private readonly entries: Map<string | number, Map<string | number, number | Record<string, EntryValue>>>;
 
-    private readonly options: Partial<Options & (ReadOptions | WriteOptions)>;
+    private readonly options: Partial<Options>;
 
-    constructor(options?: Partial<Options & WriteOptions>);
-    constructor(path: string, options?: Partial<Options & ReadOptions>);
-    constructor(buffer: Buffer, options?: Partial<Options & ReadOptions>);
-    constructor(arg0?: string | Buffer | Partial<Options & (ReadOptions | WriteOptions)>, arg1?: Partial<Options & (ReadOptions | WriteOptions)>) {
+    constructor(path: string, options?: Partial<Options>) {
         this.iNodes = new Map();
         this.entries = new Map();
 
-        if (typeof arg0 == "string" || arg0 instanceof Buffer) {
-            const reader = new BinReader(typeof arg0 == "string" ? readFileSync(arg0) : arg0);
+        if (existsSync(path)) {
+            const reader = new BinReader(readFileSync(path));
             const { version, x64, lastUpdate, creation } = new DBInfo(reader);
             const { entries } = new INode(reader, x64, true);
 
@@ -44,7 +39,7 @@ export class InterstellarDB {
             this.lastUpdate = lastUpdate;
             this.creation = creation;
             this.reader = reader;
-            this.options = arg1 ?? {};
+            this.options = options ?? {};
             this.x64 = this.options.x64 ?? x64;
 
             entries.forEach((offset, name) => {
@@ -59,7 +54,7 @@ export class InterstellarDB {
             this.version = InterstellarDB.CURRENT_VERSION;
             this.lastUpdate = date;
             this.creation = date;
-            this.options = arg0 ?? {};
+            this.options = options ?? {};
             this.x64 = this.options.x64 ?? false;
         }
     }
@@ -88,7 +83,7 @@ export class InterstellarDB {
                 if (typeof cacheEntry == "number" && this.reader) {
                     const readEntry = new Entry(this.reader.setOffset(cacheEntry), this.iNodes.get(structure)!.structure.struct);
 
-                    if (!("no_cache" in this.options) || !this.options.no_cache) {
+                    if (!this.options.no_cache) {
                         entries.set(entry, readEntry.entry);
                     }
 
@@ -116,7 +111,7 @@ export class InterstellarDB {
                 if (typeof value == "number" && this.reader) {
                     const readEntry = new Entry(this.reader.setOffset(value), this.iNodes.get(structure)!.structure.struct);
 
-                    if (!("no_cache" in this.options) || !this.options.no_cache) {
+                    if (!this.options.no_cache) {
                         entries.set(key, readEntry.entry);
                     }
 
