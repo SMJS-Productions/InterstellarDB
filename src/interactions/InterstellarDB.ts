@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFile, readFileSync } from "fs";
 import { Options } from "../interfaces/Options";
 import { DBInfo } from "../structures/DBInfo";
 import { Entry } from "../structures/Entry";
@@ -7,6 +7,36 @@ import { EntryValue } from "../types/EntryValue";
 import { BinReader } from "../utils/BinReader";
 
 export class InterstellarDB {
+
+    public static init(path: string, options?: Partial<Options>): InterstellarDB;
+    public static init(path: string, options?: Partial<Options & { asynchronous: true }>): Promise<InterstellarDB>;
+    public static init(path: string, options?: Partial<Options>): InterstellarDB | Promise<InterstellarDB> {
+        if (options?.asynchronous) {
+            return new Promise((resolve, reject) => {
+                if (existsSync(path)) {
+                    readFile(path, (error, buffer) => {
+                        if (error) {
+                            reject(error);
+                        } else {
+                            try {
+                                resolve(new InterstellarDB(path, buffer, options));
+                            } catch(error) {
+                                reject(error);
+                            }
+                        }
+                    });
+                } else {
+                    try {
+                        resolve(new InterstellarDB(path, options));
+                    } catch(error) {
+                        reject(error);
+                    }
+                }
+            });
+        } else {
+            return new InterstellarDB(path, options);
+        }
+    }
 
     public static readonly CURRENT_VERSION = DBInfo.VERSION;
     
@@ -26,12 +56,16 @@ export class InterstellarDB {
 
     private readonly options: Partial<Options>;
 
-    constructor(path: string, options?: Partial<Options>) {
+    private constructor(path: string, buffer: Buffer, options?: Partial<Options>);
+    private constructor(path: string, options?: Partial<Options>);
+    private constructor(arg0: string, arg1?: Partial<Options> | Buffer, arg2?: Partial<Options>) {
+        const hasBuffer = arg1 instanceof Buffer;
+
         this.iNodes = new Map();
         this.entries = new Map();
 
-        if (existsSync(path)) {
-            const reader = new BinReader(readFileSync(path));
+        if (hasBuffer || existsSync(arg0)) {
+            const reader = new BinReader(hasBuffer ? arg1 : readFileSync(arg0));
             const { version, x64, lastUpdate, creation } = new DBInfo(reader);
             const { entries } = new INode(reader, x64, true);
 
@@ -39,7 +73,7 @@ export class InterstellarDB {
             this.lastUpdate = lastUpdate;
             this.creation = creation;
             this.reader = reader;
-            this.options = options ?? {};
+            this.options = (hasBuffer ? arg2 : arg1) ?? {};
             this.x64 = this.options.x64 ?? x64;
 
             entries.forEach((offset, name) => {
@@ -54,13 +88,9 @@ export class InterstellarDB {
             this.version = InterstellarDB.CURRENT_VERSION;
             this.lastUpdate = date;
             this.creation = date;
-            this.options = options ?? {};
+            this.options = arg1 ?? {};
             this.x64 = this.options.x64 ?? false;
         }
-    }
-
-    public getStructureNames(): Array<number | string> {
-        return Array.from(this.iNodes.keys());
     }
 
     public getEntryNames(structure: string): Array<number | string> {
@@ -101,6 +131,10 @@ export class InterstellarDB {
 
     public getEntries<T extends Record<string, EntryValue>>(structure: string): T[] {
         return Object.values(this.getStructure(structure));
+    }
+
+    public getStructureNames(): Array<number | string> {
+        return Array.from(this.iNodes.keys());
     }
 
     public getStructure<T extends Record<string, EntryValue>>(structure: string): Record<string, T> {

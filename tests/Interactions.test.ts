@@ -89,13 +89,13 @@ function defaultDBTests(db: InterstellarDB): void {
 }
 
 describe("Reading out the complex binary storage through API interactions", () => {
-    const db = new InterstellarDB(join(__dirname, "./resources/complex_test.bin"));
+    const db = InterstellarDB.init(join(__dirname, "./resources/complex_test.bin"));
 
     defaultDBTests(db);
 });
 
 describe("Reading out the complex binary storage through API interactions without caches", () => {
-    const db = new InterstellarDB(join(__dirname, "./resources/complex_test.bin"), {
+    const db = InterstellarDB.init(join(__dirname, "./resources/complex_test.bin"), {
         no_cache: true
     });
 
@@ -108,7 +108,7 @@ describe("Reading out the complex binary storage through API interactions withou
 });
 
 describe("Reading out the complex binary storage through API interactions while in 64-bit porting mode", () => {
-    const db = new InterstellarDB(join(__dirname, "./resources/complex_test.bin"), {
+    const db = InterstellarDB.init(join(__dirname, "./resources/complex_test.bin"), {
         x64: true
     });
 
