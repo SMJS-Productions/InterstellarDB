@@ -27,6 +27,8 @@ export class BinWriter {
         }
     }
 
+    public writeNumberType(type: Type, value: number, annotated?: boolean): this;
+    public writeNumberType(type: Type.LONG, value: number | bigint, annotated?: boolean): this;
     public writeNumberType(type: Type, value: number | bigint, annotated: boolean = true): this {
         const size = ((type: Type): number => {
             switch (type) {
