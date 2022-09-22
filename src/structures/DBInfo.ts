@@ -14,11 +14,11 @@ export class DBInfo {
 
     public readonly creation: Date;
 
-    public readonly lastUpdate: Date;
+    public lastUpdate: Date;
 
     constructor(reader: BinReader);
-    constructor(writer: BinWriter, x64: boolean, creation: Date);
-    constructor(arg0: BinReader | BinWriter, arg1?: boolean, arg2?: Date) {
+    constructor(x64: boolean, creation: Date);
+    constructor(arg0: BinReader | boolean, arg1?: Date) {
 
         if (arg0 instanceof BinReader) {
             const checkpoint = arg0.addCheckpoint();
@@ -50,14 +50,23 @@ export class DBInfo {
 
                 throw error;
             }
-        } else if (typeof arg1 != "undefined" && arg2) {
-            arg0.writeNumberType(Type.INTEGER, DBInfo.SPEED_OF_LIGHT, false);
-            arg0.writeNumberType(Type.INTEGER, this.version = DBInfo.VERSION, false);
-            arg0.writeBool(this.x64 = arg1, false);
-            arg0.writeNumberType(Type.LONG, (this.creation = arg2).getTime(), false);
-            arg0.writeNumberType(Type.LONG, (this.lastUpdate = new Date()).getTime(), false);
+        } else if (arg1) {
+            this.version = DBInfo.VERSION;
+            this.x64 = arg0;
+            this.creation = arg1;
+            this.lastUpdate = new Date();
         } else {
             throw new Error("Invalid constructor arguments.");
         }
+    }
+
+    public write(writer: BinWriter): BinWriter {
+        writer.writeNumberType(Type.INTEGER, DBInfo.SPEED_OF_LIGHT, false);
+        writer.writeNumberType(Type.INTEGER, this.version, false);
+        writer.writeBool(this.x64, false);
+        writer.writeNumberType(Type.LONG, this.creation.getTime(), false);
+        writer.writeNumberType(Type.LONG, (this.lastUpdate = new Date()).getTime(), false);
+
+        return writer;
     }
 }
