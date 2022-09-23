@@ -19,7 +19,6 @@ export class DBInfo {
     constructor(reader: BinReader);
     constructor(x64: boolean, creation: Date);
     constructor(arg0: BinReader | boolean, arg1?: Date) {
-
         if (arg0 instanceof BinReader) {
             const checkpoint = arg0.addCheckpoint();
 
