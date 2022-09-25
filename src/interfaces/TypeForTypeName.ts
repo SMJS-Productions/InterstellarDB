@@ -1,4 +1,6 @@
 export interface TypeForTypeName {
+    null: null | undefined,
+    undefined: null | undefined,
     string: string,
     wstring: string,
     bool: boolean,
